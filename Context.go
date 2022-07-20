@@ -5,14 +5,16 @@ import (
 )
 
 // #include "wrapper/Context.h"
+// #include "plot_wrapper/Contexts.h"
 import "C"
 
-// Context specifies a scope of ImGui.
+// Context specifies a scope of ImGui/ImPlot.
 //
 // All contexts share a same FontAtlas by default.
 // If you want different font atlas, you can create them and overwrite the CurrentIO.Fonts of an ImGui context.
 type Context struct {
 	handle C.IggContext
+	plot   C.igpContext
 }
 
 // CreateContext produces a new internal state scope.
@@ -22,7 +24,7 @@ func CreateContext(fontAtlas *FontAtlas) *Context {
 	if fontAtlas != nil {
 		fontAtlasPtr = fontAtlas.handle()
 	}
-	return &Context{handle: C.iggCreateContext(fontAtlasPtr)}
+	return &Context{handle: C.iggCreateContext(fontAtlasPtr), plot: C.igpCreateContext()}
 }
 
 // ErrNoContext is used when no context is current.
@@ -35,7 +37,7 @@ func CurrentContext() (*Context, error) {
 	if raw == nil {
 		return nil, ErrNoContext
 	}
-	return &Context{handle: raw}, nil
+	return &Context{handle: raw, plot: C.igpCurrentContext()}, nil
 }
 
 // Destroy removes the internal state scope.
@@ -44,6 +46,10 @@ func (context *Context) Destroy() {
 	if context.handle != nil {
 		C.iggDestroyContext(context.handle)
 		context.handle = nil
+	}
+	if context.plot != nil {
+		C.igpDestroyContext(context.plot)
+		context.plot = nil
 	}
 }
 
@@ -56,5 +62,6 @@ func (context Context) SetCurrent() error {
 		return ErrContextDestroyed
 	}
 	C.iggSetCurrentContext(context.handle)
+	C.igpSetCurrentContext(context.plot)
 	return nil
 }

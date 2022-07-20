@@ -2,11 +2,14 @@
 
 // imgui code
 // imgui/ is added to include path in wrapper.go
+#ifndef IMPLOT_GO_PREBUILT
 #include "imgui.cpp"
 #include "imgui_demo.cpp"
 #include "imgui_draw.cpp"
 #include "imgui_tables.cpp"
 #include "imgui_widgets.cpp"
+#endif
+
 #ifdef IMGUI_ENABLE_FREETYPE
 #include "misc/freetype/imgui_freetype.cpp"
 #endif
